@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 @Component
@@ -24,17 +25,20 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Seed default admin if no admin exists
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            User defaultAdmin = User.builder()
-                    .username("admin")
-                    .password(passwordEncoder.encode("admin123"))
-                    .role(Role.ROLE_ADMIN)
-                    .fullName("System Administrator")
-                    .email("admin@result.com")
-                    .build();
-            userRepository.save(defaultAdmin);
-            LOGGER.info("Seeded default admin user into database: username=admin, password=admin123");
+        // Seed or update admin user credentials
+        Optional<User> existingAdmin = userRepository.findByUsername("jyotiprakashnayak");
+        if (existingAdmin.isEmpty()) {
+            Optional<User> oldAdmin = userRepository.findByUsername("admin");
+            User admin = oldAdmin.orElseGet(User::new);
+
+            admin.setUsername("jyotiprakashnayak");
+            admin.setPassword(passwordEncoder.encode("Jyotyprakash@1234"));
+            admin.setRole(Role.ROLE_ADMIN);
+            admin.setFullName("Jyotiprakash Nayak");
+            admin.setEmail("jyotiprakashnayak@gmail.com");
+
+            userRepository.save(admin);
+            LOGGER.info("Admin account initialized successfully.");
         }
     }
 }
